@@ -1,0 +1,33 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+# Build outputs
+dist/*
+!dist/Sorterr
+build/
+*.spec
+!Sorterr.exe
+!Sorterr-x86_64.AppImage
+!sorterr.png
+!sorterr.desktop
+!build_appimage.sh
+!appimagetool
+
+# Sorterr runtime files
+.sorterr_cache/
+.sorterr_metadata.json
+Picks/
+Rejects/
+
+# Sample images (not for distribution)
+sample_*.jpg
+
+# PyInstaller
+*.manifest
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db

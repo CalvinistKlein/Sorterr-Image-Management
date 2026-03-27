@@ -1,0 +1,74 @@
+name: Build Windows and Linux Versions
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies and Create venv
+      run: |
+        python -m venv venv
+        venv\Scripts\python.exe -m pip install --upgrade pip
+        venv\Scripts\pip.exe install -r requirements.txt
+        venv\Scripts\pip.exe install pyinstaller
+
+    - name: Build Binary with build.bat
+      run: |
+        cmd /c build.bat
+
+    - name: Upload Windows Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sorterr-Windows
+        path: dist/Sorterr.exe
+
+
+  build-linux-appimage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies and Create venv
+      run: |
+        python -m venv venv
+        ./venv/bin/pip install --upgrade pip
+        ./venv/bin/pip install -r requirements.txt
+        ./venv/bin/pip install pyinstaller
+
+    - name: Build Binary with build.sh
+      run: |
+        chmod +x build.sh
+        bash build.sh
+
+    - name: Build AppImage with build_appimage.sh
+      run: |
+        chmod +x build_appimage.sh
+        bash build_appimage.sh
+
+    - name: Upload Linux Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sorterr-Linux-AppImage
+        path: Sorterr-x86_64.AppImage

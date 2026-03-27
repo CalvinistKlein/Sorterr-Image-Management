@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Sorterr
+Exec=Sorterr
+Icon=sorterr
+Categories=Graphics;
+Comment=Professional photo culling, built for speed.
+Terminal=false

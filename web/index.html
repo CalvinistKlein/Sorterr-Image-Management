@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorterr | Photo Culling</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="/eel.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Minimalist Header -->
+        <header id="top-bar">
+            <div class="logo">Sorterr</div>
+            <div class="controls">
+                <button id="open-picker-btn" class="action-btn">Select Folder</button>
+                <div class="divider"></div>
+                <div id="filters">
+                    <button class="filter-btn active" data-filter="All">All</button>
+                    <button class="filter-btn" data-filter="Unsorted">Unsorted</button>
+                    <button class="filter-btn" data-filter="Pick">Picks</button>
+                    <button class="filter-btn" data-filter="Reject">Rejects</button>
+                </div>
+                <button id="smart-collection-btn" class="filter-btn outline" title="Group by Time">Smart Collect</button>
+                <div class="divider"></div>
+                <div id="layouts">
+                    <button class="layout-btn active" data-layout="single">■</button>
+                    <button class="layout-btn" data-layout="split">◫</button>
+                    <button class="layout-btn" data-layout="grid">⊞</button>
+                </div>
+                <select id="sort-order" class="flat-select">
+                    <option value="name">Sort by Name</option>
+                    <option value="rating">Sort by Rating</option>
+                    <option value="time">Sort by Time</option>
+                </select>
+                <div class="divider"></div>
+                <button id="settings-btn" class="icon-btn" title="Info, Settings & Shortcuts">⚙</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main id="workspace">
+            <div id="preview-container">
+                <button id="prev-img-btn" class="nav-arrow left">&lt;</button>
+                
+                <div id="image-grid" class="layout-single">
+                    <div class="img-wrapper">
+                        <img id="main-image-0" src="" alt="Preview 1">
+                        <div class="status-indicator-overlay top-right"></div>
+                        <div class="color-indicator-overlay bottom-left"></div>
+                        <div class="stars-indicator-overlay bottom-right"></div>
+                    </div>
+                    <div class="img-wrapper hidden-in-single">
+                        <img id="main-image-1" src="" alt="Preview 2">
+                        <div class="status-indicator-overlay top-right"></div>
+                        <div class="color-indicator-overlay bottom-left"></div>
+                        <div class="stars-indicator-overlay bottom-right"></div>
+                    </div>
+                    <div class="img-wrapper hidden-in-split hidden-in-single">
+                        <img id="main-image-2" src="" alt="Preview 3">
+                        <div class="status-indicator-overlay top-right"></div>
+                        <div class="color-indicator-overlay bottom-left"></div>
+                        <div class="stars-indicator-overlay bottom-right"></div>
+                    </div>
+                    <div class="img-wrapper hidden-in-split hidden-in-single">
+                        <img id="main-image-3" src="" alt="Preview 4">
+                        <div class="status-indicator-overlay top-right"></div>
+                        <div class="color-indicator-overlay bottom-left"></div>
+                        <div class="stars-indicator-overlay bottom-right"></div>
+                    </div>
+                </div>
+
+                <button id="next-img-btn" class="nav-arrow right">&gt;</button>
+
+                <!-- Viewer Action Buttons -->
+                <div id="viewer-actions">
+                    <button id="viewer-pick-btn" class="viewer-btn pick-btn" title="Pick (↑ / W)">✓ Pick</button>
+                    <button id="viewer-restore-btn" class="viewer-btn restore-btn" title="Restore to Unsorted (Alt+↑/↓)">↩ Restore</button>
+                    <button id="viewer-reject-btn" class="viewer-btn reject-btn" title="Reject (↓ / S)">✕ Reject</button>
+                </div>
+
+                <div id="no-images">
+                    <div id="welcome-screen">
+                        <div class="welcome-logo">Sorterr</div>
+                        <p class="welcome-sub">Professional photo culling</p>
+                        <button id="welcome-open-btn" class="action-btn large-btn">📂 Open Folder</button>
+                        <div id="recent-projects-section">
+                            <h4>Recent Projects</h4>
+                            <div id="recent-projects-list"></div>
+                            <p id="no-recents-msg" class="welcome-hint">No recent projects yet.</p>
+                        </div>
+                        <p class="welcome-hint">Tip: Press <kbd>O</kbd> to open a folder at any time.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Metadata Panel -->
+             <div id="side-panel">
+                <div class="info-group">
+                    <label>Folder</label>
+                    <div id="current-dir-label">No folder selected</div>
+                </div>
+                <div class="info-group">
+                    <label>Filename</label>
+                    <div id="filename" class="value-text">Filename.jpg</div>
+                </div>
+                <div class="info-group">
+                    <label>Rating</label>
+                    <div id="rating-container">
+                        <span class="star" data-value="1">&#9733;</span>
+                        <span class="star" data-value="2">&#9733;</span>
+                        <span class="star" data-value="3">&#9733;</span>
+                        <span class="star" data-value="4">&#9733;</span>
+                        <span class="star" data-value="5">&#9733;</span>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <label>Color Tag</label>
+                    <div id="color-tag-container">
+                        <div class="color-dot none active" data-color="None" title="None"></div>
+                        <div class="color-dot red" data-color="Red" title="Red"></div>
+                        <div class="color-dot yellow" data-color="Yellow" title="Yellow"></div>
+                        <div class="color-dot green" data-color="Green" title="Green"></div>
+                        <div class="color-dot blue" data-color="Blue" title="Blue"></div>
+                        <div class="color-dot purple" data-color="Purple" title="Purple"></div>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <label>Status</label>
+                    <div id="status-tag">Unsorted</div>
+                </div>
+                
+                <div class="divider-horiz"></div>
+
+                <div class="info-group exif-group">
+                    <label>EXIF Data</label>
+                    <div id="exif-data">
+                        <div class="exif-row"><span class="exif-label">Camera:</span> <span id="exif-camera">-</span></div>
+                        <div class="exif-row"><span class="exif-label">Settings:</span> <span id="exif-settings">-</span></div>
+                        <div class="exif-row"><span class="exif-label">Date:</span> <span id="exif-date">-</span></div>
+                    </div>
+                </div>
+
+                <div class="info-group mt-auto">
+                    <label>Progress</label>
+                    <div id="counter" class="value-text">0 / 0</div>
+                </div>
+                <div class="info-group" id="cache-group" style="display:none">
+                    <label>Caching Thumbnails</label>
+                    <div id="cache-bar-wrap" style="background:var(--bg-elevated);border-radius:4px;height:6px;overflow:hidden;margin-top:4px">
+                        <div id="cache-bar" style="height:100%;width:0%;background:var(--accent);transition:width 0.3s"></div>
+                    </div>
+                    <div id="cache-label" class="value-text" style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px">0 / 0</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Thumbnails -->
+        <footer id="thumbnail-strip">
+            <button id="scroll-left-btn" class="scroll-arrow">&lt;</button>
+            <div id="thumbnails-track"></div>
+            <button id="scroll-right-btn" class="scroll-arrow">&gt;</button>
+        </footer>
+
+
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="hidden">
+            <div class="modal-content settings-content">
+                <div class="modal-header">
+                    <h3>Settings & Shortcuts</h3>
+                    <button id="close-settings-btn" class="close-btn">&times;</button>
+                </div>
+                <div class="settings-body">
+                    <p class="settings-desc">Click any button below to change the keybind. Press <strong>Esc</strong> to cancel listening. Pressing a key will overwrite the primary bind.</p>
+                    
+                    <div class="keybind-row">
+                        <span>Previous Image</span>
+                        <button class="keybind-input" data-action="prevImage">Left</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span>Next Image</span>
+                        <button class="keybind-input" data-action="nextImage">Right</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span>Pick Image</span>
+                        <button class="keybind-input" data-action="pick">Up</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span>Reject Image</span>
+                        <button class="keybind-input" data-action="reject">Down</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span>Previous Layout Mode</span>
+                        <button class="keybind-input" data-action="prevLayout">Q</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span>Next Layout Mode</span>
+                        <button class="keybind-input" data-action="nextLayout">E</button>
+                    </div>
+                    <div class="keybind-row">
+                        <span>Open Folder Picker</span>
+                        <button class="keybind-input" data-action="openPicker">O</button>
+                    </div>
+
+                    <div class="divider-horiz my-3"></div>
+
+                    <div class="keybind-row">
+                        <span>Preload Ahead Count</span>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <input type="range" id="preload-count-slider" min="1" max="10" value="3" style="width:80px;accent-color:var(--accent)">
+                            <span id="preload-count-label" style="min-width:16px;text-align:center;font-weight:bold">3</span>
+                        </div>
+                    </div>
+
+                    <div class="divider-horiz my-3"></div>
+                    
+                    <p class="settings-desc"><strong>Fixed Shortcuts:</strong><br>1-5: Star Ratings<br>6-0: Color Tags (Red, Yellow, Green, Blue, Purple)<br>Backtick (`): Clear Color Tag</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="reset-keybinds-btn" class="filter-btn outline">Reset to Defaults</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Overlay -->
+        <div id="action-overlay" class="hidden">
+            <span id="action-text"></span>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
