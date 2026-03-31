@@ -10,9 +10,9 @@ Sorterr is a fast, keyboard-driven desktop application for sorting and culling l
 
 | Platform | Link |
 |---|---|
-| **Windows** | [Download Sorterr.exe (v1.0)](Sorterr.exe) |
-| **Linux (AppImage)** | [Download Sorterr-x86_64.AppImage (v1.0)](Sorterr-x86_64.AppImage) |
-| **Linux (Binary)** | [Download Sorterr (v1.0)](dist/Sorterr) |
+| **Windows** | [Download Sorterr.exe (v1.0)](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases) |
+| **Linux (AppImage)** | [Download Sorterr-x86_64.AppImage (v1.0)](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases) |
+| **Linux (Binary)** | [Download Sorterr (v1.0)](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases) |
 
 ---
 
@@ -111,15 +111,15 @@ run.bat     # (to be created)
 ### Linux / macOS
 
 ```bash
-chmod +x build.sh
-./build.sh
+chmod +x scripts/build.sh
+./scripts/build.sh
 # Output: dist/Sorterr
 ```
 
 ### Windows
 
 ```bat
-build.bat
+scripts\build.bat
 :: Output: dist\Sorterr.exe
 ```
 

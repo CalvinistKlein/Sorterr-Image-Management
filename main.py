@@ -10,8 +10,12 @@ from datetime import datetime
 import threading
 from flask import Flask, request, Response, send_file
 import exifread
-import tkinter as tk
-from tkinter import filedialog
+try:
+    import tkinter as tk
+    from tkinter import filedialog
+    HAS_TKINTER = True
+except ImportError:
+    HAS_TKINTER = False
 
 try:
     import rawpy
@@ -252,16 +256,32 @@ def start_flask():
 
 @eel.expose
 def open_system_folder_dialog():
-    try:
-        root = tk.Tk()
-        root.withdraw()
-        root.wm_attributes('-topmost', 1)
-        folder_path = filedialog.askdirectory()
-        root.destroy()
-        return folder_path if folder_path else None
-    except Exception as e:
-        print(f"Error opening folder dialog: {e}")
-        return None
+    # Linux: Use zenity for a native Nautilus picker without needing python3-tk
+    if sys.platform.startswith('linux'):
+        import subprocess
+        try:
+            # --file-selection --directory triggers the native folder picker
+            result = subprocess.run(['zenity', '--file-selection', '--directory', '--title=Select Gallery Folder'], 
+                                  capture_output=True, text=True)
+            if result.returncode == 0:
+                return result.stdout.strip()
+        except Exception as e:
+            print(f"Zenity error: {e}")
+
+    # Windows / Fallback: Use tkinter
+    if HAS_TKINTER:
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            root.wm_attributes('-topmost', 1)
+            folder_path = filedialog.askdirectory()
+            root.destroy()
+            return folder_path if folder_path else None
+        except Exception as e:
+            print(f"Tkinter error: {e}")
+    
+    print("No native folder picker available (neither Zenity nor Tkinter found).")
+    return None
 
 @eel.expose
 def set_current_folder(folder_path):

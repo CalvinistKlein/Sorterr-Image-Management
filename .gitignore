@@ -4,16 +4,13 @@ __pycache__/
 *.py[cod]
 *.pyo
 # Build outputs
-dist/*
-!dist/Sorterr
+dist/
 build/
 *.spec
-!Sorterr.exe
-!Sorterr-x86_64.AppImage
-!sorterr.png
-!sorterr.desktop
-!build_appimage.sh
-!appimagetool
+Sorterr.exe
+Sorterr-x86_64.AppImage
+appimagetool
+Sorterr.AppDir/
 
 # Sorterr runtime files
 .sorterr_cache/
