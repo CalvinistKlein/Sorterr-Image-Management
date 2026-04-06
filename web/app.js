@@ -2,17 +2,21 @@ let allImages = [];
 let filteredImages = [];
 let currentIndex = 0;
 let currentFilter = 'All';
-let currentSort = 'name';
+let currentSort = 'time';
 let currentDir = '';
 let pickerPath = '';
 let currentLayout = 'single';
 let layoutSize = 1;
-let smartCollectActive = false;
+let timeGroupingActive = false;
+let burstGroupingActive = false;
 
 // Browser-side image preload cache
 const preloadCache = new Map();
 let PRELOAD_AHEAD = parseInt(localStorage.getItem('sorterr_preload_ahead') || '3', 10);
 const PRELOAD_BEHIND = 1;
+let SMART_COLLECT_GAP = parseInt(localStorage.getItem('sorterr_smart_gap') || '10', 10);
+let BURST_GAP = parseFloat(localStorage.getItem('sorterr_burst_gap') || '1.0');
+let BURST_MIN_COUNT = parseInt(localStorage.getItem('sorterr_burst_min_count') || '3', 10);
 
 function preloadUrl(url) {
     if (!url || preloadCache.has(url)) return;
@@ -72,7 +76,8 @@ const noImages = document.getElementById('no-images');
 const stars = document.querySelectorAll('.star');
 const colorDots = document.querySelectorAll('.color-dot');
 const layoutBtns = document.querySelectorAll('.layout-btn');
-const smartCollectBtn = document.getElementById('smart-collection-btn');
+const timeGroupingBtn = document.getElementById('time-grouping-btn');
+const burstGroupingBtn = document.getElementById('burst-grouping-btn');
 
 const settingsModal = document.getElementById('settings-modal');
 const keybindInputs = document.querySelectorAll('.keybind-input');
@@ -266,23 +271,54 @@ document.getElementById('reset-keybinds-btn').onclick = () => {
     renderKeybindsUI();
 };
 
-// Preload count slider
-const preloadSlider = document.getElementById('preload-count-slider');
-const preloadCountLabel = document.getElementById('preload-count-label');
-preloadSlider.value = PRELOAD_AHEAD;
-preloadCountLabel.textContent = PRELOAD_AHEAD;
-preloadSlider.oninput = () => {
-    PRELOAD_AHEAD = parseInt(preloadSlider.value, 10);
-    preloadCountLabel.textContent = PRELOAD_AHEAD;
-    localStorage.setItem('sorterr_preload_ahead', PRELOAD_AHEAD);
-};
+// Helper for Bi-directional sync between Slider and Number Input
+function setupSyncGroup(sliderId, inputId, storageKey, isFloat, initialValue, onUpdate) {
+    const slider = document.getElementById(sliderId);
+    const input = document.getElementById(inputId);
+    if (!slider || !input) return;
+
+    // Set initial values
+    slider.value = initialValue;
+    input.value = initialValue;
+
+    const update = (val) => {
+        const parsed = isFloat ? parseFloat(val) : parseInt(val, 10);
+        slider.value = parsed;
+        input.value = parsed;
+        localStorage.setItem(storageKey, parsed);
+        onUpdate(parsed);
+    };
+
+    slider.oninput = (e) => update(e.target.value);
+    input.onchange = (e) => update(e.target.value);
+}
+
+// Initialize Sync Groups
+setupSyncGroup('preload-count-slider', 'preload-count-input', 'sorterr_preload_ahead', false, PRELOAD_AHEAD, (val) => {
+    PRELOAD_AHEAD = val;
+});
+
+setupSyncGroup('smart-gap-slider', 'smart-gap-input', 'sorterr_smart_gap', false, SMART_COLLECT_GAP, (val) => {
+    SMART_COLLECT_GAP = val;
+    if (timeGroupingActive) renderThumbnails();
+});
+
+setupSyncGroup('burst-window-slider', 'burst-window-input', 'sorterr_burst_gap', true, BURST_GAP, (val) => {
+    BURST_GAP = val;
+    if (burstGroupingActive) renderThumbnails();
+});
+
+setupSyncGroup('burst-count-slider', 'burst-count-input', 'sorterr_burst_min_count', false, BURST_MIN_COUNT, (val) => {
+    BURST_MIN_COUNT = val;
+    if (burstGroupingActive) renderThumbnails();
+});
 
 // Filters & Sort
 function applyFilters() {
     if (currentFilter === 'All') filteredImages = [...allImages];
     else filteredImages = allImages.filter(img => img.status === currentFilter);
 
-    if (smartCollectActive) { currentSort = 'time'; document.getElementById('sort-order').value = 'time'; }
+    if (timeGroupingActive || burstGroupingActive) { currentSort = 'time'; document.getElementById('sort-order').value = 'time'; }
 
     if (currentSort === 'name') filteredImages.sort((a, b) => a.filename.localeCompare(b.filename));
     else if (currentSort === 'rating') filteredImages.sort((a, b) => b.rating - a.rating);
@@ -353,15 +389,49 @@ function updateIndicatorsForImage(index) {
 
 function renderThumbnails() {
     thumbnailsTrack.innerHTML = '';
+    
+    // Pre-calculate burst clusters for Min Count filtering
+    const burstMap = new Map(); // filename -> groupSize
+    if (burstGroupingActive) {
+        let currentCluster = [];
+        for (let i = 0; i < filteredImages.length; i++) {
+            const img = filteredImages[i];
+            const prevImg = filteredImages[i-1];
+            const gap = prevImg ? img.timestamp - prevImg.timestamp : Infinity;
+            
+            if (gap <= BURST_GAP) {
+                currentCluster.push(img.filename);
+            } else {
+                if (currentCluster.length >= BURST_MIN_COUNT) {
+                    currentCluster.forEach(fn => burstMap.set(fn, currentCluster.length));
+                }
+                currentCluster = [img.filename];
+            }
+        }
+        if (currentCluster.length >= BURST_MIN_COUNT) {
+            currentCluster.forEach(fn => burstMap.set(fn, currentCluster.length));
+        }
+    }
+
     let lastTime = null;
     filteredImages.forEach((img, index) => {
-        if (smartCollectActive && lastTime !== null && (img.timestamp - lastTime > 60)) {
+        const gap = (lastTime !== null) ? img.timestamp - lastTime : null;
+
+        // High-priority: Time Grouping Divider (Scene Change - Yellow)
+        if (timeGroupingActive && gap !== null && (gap > SMART_COLLECT_GAP)) {
             const divider = document.createElement('div');
-            divider.style.width = '2px'; divider.style.height = '100%';
-            divider.style.backgroundColor = 'var(--accent)';
-            divider.style.margin = '0 10px';
+            divider.className = 'group-divider time-group';
+            thumbnailsTrack.appendChild(divider);
+        } 
+        
+        // Secondary: Burst Grouping Divider (Blue)
+        // Only show if both photos are part of a valid burst sequence (meets MIN_COUNT)
+        if (burstGroupingActive && gap !== null && (gap <= BURST_GAP) && burstMap.has(img.filename)) {
+            const divider = document.createElement('div');
+            divider.className = 'group-divider burst-group';
             thumbnailsTrack.appendChild(divider);
         }
+        
         lastTime = img.timestamp;
         
         const item = document.createElement('div');
@@ -560,8 +630,9 @@ document.querySelectorAll('.filter-btn:not(#smart-collection-btn):not(#reset-key
     };
 });
 
-document.getElementById('sort-order').onchange = (e) => { currentSort = e.target.value; smartCollectActive = false; smartCollectBtn.classList.remove('active'); applyFilters(); };
-smartCollectBtn.onclick = () => { smartCollectActive = !smartCollectActive; smartCollectBtn.classList.toggle('active', smartCollectActive); applyFilters(); };
+document.getElementById('sort-order').onchange = (e) => { currentSort = e.target.value; timeGroupingActive = false; burstGroupingActive = false; timeGroupingBtn.classList.remove('active'); burstGroupingBtn.classList.remove('active'); applyFilters(); };
+timeGroupingBtn.onclick = () => { timeGroupingActive = !timeGroupingActive; timeGroupingBtn.classList.toggle('active', timeGroupingActive); applyFilters(); };
+burstGroupingBtn.onclick = () => { burstGroupingActive = !burstGroupingActive; burstGroupingBtn.classList.toggle('active', burstGroupingActive); applyFilters(); };
 layoutBtns.forEach(btn => btn.onclick = () => updateLayout(btn.dataset.layout));
 stars.forEach(s => s.onclick = () => setRating(parseInt(s.dataset.value)));
 colorDots.forEach(d => d.onclick = () => setColor(d.dataset.color));

@@ -106,6 +106,38 @@ body {
     color: var(--accent);
 }
 
+/* Time Grouping (Yellow) */
+#time-grouping-btn.active {
+    border: 1px solid var(--tag-yellow);
+    background: rgba(234, 179, 8, 0.15);
+    color: var(--tag-yellow);
+}
+
+/* Burst Grouping (Blue) */
+#burst-grouping-btn.active {
+    border: 1px solid var(--tag-blue);
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--tag-blue);
+}
+
+/* Grouping Dividers */
+.group-divider {
+    height: 100%;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+.group-divider.time-group {
+    width: 3px;
+    background-color: var(--tag-yellow);
+    box-shadow: 0 0 5px rgba(234, 179, 8, 0.3);
+}
+.group-divider.burst-group {
+    width: 2px;
+    background-color: var(--tag-blue);
+    margin: 0 2px;
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+}
+
 .layout-btn {
     background: none;
     border: none;

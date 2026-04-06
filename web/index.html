@@ -24,7 +24,8 @@
                     <button class="filter-btn" data-filter="Pick">Picks</button>
                     <button class="filter-btn" data-filter="Reject">Rejects</button>
                 </div>
-                <button id="smart-collection-btn" class="filter-btn outline" title="Group by Time">Smart Collect</button>
+                <button id="time-grouping-btn" class="filter-btn outline" title="Group by Time Gap">Time Grouping</button>
+                <button id="burst-grouping-btn" class="filter-btn outline" title="Group by Bursts (<= 1s)">Burst Grouping</button>
                 <div class="divider"></div>
                 <div id="layouts">
                     <button class="layout-btn active" data-layout="single">■</button>
@@ -32,9 +33,9 @@
                     <button class="layout-btn" data-layout="grid">⊞</button>
                 </div>
                 <select id="sort-order" class="flat-select">
+                    <option value="time" selected>Sort by Time</option>
                     <option value="name">Sort by Name</option>
                     <option value="rating">Sort by Rating</option>
-                    <option value="time">Sort by Time</option>
                 </select>
                 <div class="divider"></div>
                 <button id="settings-btn" class="icon-btn" title="Info, Settings & Shortcuts">⚙</button>
@@ -213,6 +214,30 @@
                         <div style="display:flex;align-items:center;gap:8px">
                             <input type="range" id="preload-count-slider" min="1" max="10" value="3" style="width:80px;accent-color:var(--accent)">
                             <span id="preload-count-label" style="min-width:16px;text-align:center;font-weight:bold">3</span>
+                        </div>
+                    </div>
+
+                    <div class="keybind-row">
+                        <span>Time Grouping Gap (sec)</span>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <input type="range" id="smart-gap-slider" min="2" max="300" value="10" step="1" style="width:100px;accent-color:var(--accent)">
+                            <input type="number" id="smart-gap-input" class="small-input" min="2" max="300" value="10">
+                        </div>
+                    </div>
+
+                    <div class="keybind-row">
+                        <span>Burst Window (sec)</span>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <input type="range" id="burst-window-slider" min="0.1" max="5.0" value="1.0" step="0.1" style="width:100px;accent-color:var(--tag-blue)">
+                            <input type="number" id="burst-window-input" class="small-input" min="0.1" max="5.0" value="1.0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="keybind-row">
+                        <span>Min Burst Count</span>
+                        <div style="display:flex;align-items:center;gap:12px">
+                            <input type="range" id="burst-count-slider" min="2" max="20" value="3" step="1" style="width:100px;accent-color:var(--tag-blue)">
+                            <input type="number" id="burst-count-input" class="small-input" min="2" max="20" value="3">
                         </div>
                     </div>
 

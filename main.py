@@ -1,3 +1,4 @@
+import re
 import eel
 import os
 import sys
@@ -73,35 +74,64 @@ def save_metadata(root):
         pass
 
 def write_xmp_sidecar(image_path, rating, color):
-    """Write or update an XMP sidecar with rating and color label for interoperability."""
+    """Write or surgically update an XMP sidecar with rating and color label for interoperability."""
     # Write both standard styles: image.xmp (Lightroom) and image.ext.xmp (Darktable)
     base = os.path.splitext(image_path)[0]
     sidecars = [base + ".xmp", image_path + ".xmp"]
     
     xmp_label = color if color != "None" else ""
+    # Map colors to Urgency (Darktable)
+    color_map = {"Red": 1, "Yellow": 2, "Green": 3, "Blue": 4, "Purple": 5}
+    urgency = color_map.get(color, 0)
     
-    # We use a standard minimal XMP template. 
-    # Interoperability note: xmp:Rating (0-5) and xmp:Label (string)
-    template = f"""<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+    def update_xmp_content(content, rating, label, urgency):
+        # 1. Ensure namespaces are there
+        desc_pattern = re.compile(r'(<rdf:Description[^>]*?)(/?>)', re.IGNORECASE | re.DOTALL)
+        match = desc_pattern.search(content)
+        if not match: return content # Fallback
+        
+        header, closer = match.groups()
+        
+        # Add namespaces if missing
+        if 'xmlns:xmp=' not in header: header += '\n    xmlns:xmp="http://ns.adobe.com/xap/1.0/"'
+        if 'xmlns:photoshop=' not in header: header += '\n    xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"'
+        
+        # 2. Update Attributes (Rating, Label, Urgency)
+        for attr, val in [('xmp:Rating', rating), ('xmp:Label', label), ('photoshop:Urgency', urgency)]:
+            attr_pattern = re.compile(rf'{attr}="[^"]*"')
+            if attr_pattern.search(header):
+                header = attr_pattern.sub(f'{attr}="{val}"', header)
+            else:
+                header += f'\n   {attr}="{val}"'
+        
+        return content[:match.start()] + header + closer + content[match.end():]
+
+    minimal_template = f"""<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Sorterr XMP Sync">
  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about=""
     xmlns:xmp="http://ns.adobe.com/xap/1.0/"
     xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
    xmp:Rating="{rating}"
-   xmp:Label="{xmp_label}"/>
+   xmp:Label="{xmp_label}"
+   photoshop:Urgency="{urgency}"/>
  </rdf:RDF>
 </x:xmpmeta>
 <?xpacket end="w"?>"""
 
     for sc_path in sidecars:
         try:
-            # Check if file exists to avoid wiping other metadata (simple check)
-            # Future improvement: parse and inject instead of overwrite
-            with open(sc_path, "w", encoding="utf-8") as f:
-                f.write(template)
+            if os.path.exists(sc_path):
+                with open(sc_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                new_content = update_xmp_content(content, rating, xmp_label, urgency)
+                with open(sc_path, "w", encoding="utf-8") as f:
+                    f.write(new_content)
+            else:
+                with open(sc_path, "w", encoding="utf-8") as f:
+                    f.write(minimal_template)
         except Exception as e:
-            print(f"XMP error {sc_path}: {e}")
+            print(f"XMP Sync Error {sc_path}: {e}")
 
 def open_image(filepath):
     """Open any image (including RAW) as a PIL Image."""
