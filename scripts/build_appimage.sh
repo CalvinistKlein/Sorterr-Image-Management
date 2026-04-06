@@ -2,23 +2,24 @@
 set -e
 
 # Configuration
-APP_NAME="Sorterr"
+APP_NAME="Sorterr-v1.4"
 APP_DIR="Sorterr.AppDir"
-EXECUTABLE="../dist/Sorterr"
-ICON="../assets/sorterr.png"
-DESKTOP="../packaging/linux/sorterr.desktop"
+EXECUTABLE="../dist/Sorterr-v1.4"
+ICON="../web/favicon.ico" # Use web favicon as fallback icons if assets is missing
 
 echo "=== Building AppImage for $APP_NAME ==="
 
 # 1. Prepare AppDir
 echo "[1/4] Preparing AppDir..."
+rm -rf "$APP_DIR"
 mkdir -p "$APP_DIR/usr/bin"
 mkdir -p "$APP_DIR/usr/share/icons/hicolor/512x512/apps"
 
 cp "$EXECUTABLE" "$APP_DIR/usr/bin/Sorterr"
-cp "$ICON" "$APP_DIR/usr/share/icons/hicolor/512x512/apps/sorterr.png"
-cp "$ICON" "$APP_DIR/sorterr.png"
-cp "$DESKTOP" "$APP_DIR/sorterr.desktop"
+if [ -f "$ICON" ]; then
+    cp "$ICON" "$APP_DIR/usr/share/icons/hicolor/512x512/apps/sorterr.png"
+    cp "$ICON" "$APP_DIR/sorterr.png"
+fi
 
 # Create AppRun
 cat <<EOF > "$APP_DIR/AppRun"
@@ -29,8 +30,16 @@ exec Sorterr "\$@"
 EOF
 chmod +x "$APP_DIR/AppRun"
 
-# Link icon and desktop to root of AppDir (standard requirement)
-ln -sf usr/share/icons/hicolor/512x512/apps/sorterr.png "$APP_DIR/sorterr.png"
+# Create .desktop if missing
+cat <<EOF > "$APP_DIR/sorterr.desktop"
+[Desktop Entry]
+Type=Application
+Name=Sorterr
+Exec=Sorterr
+Icon=sorterr
+Categories=Graphics;
+EOF
+
 ln -sf sorterr.desktop "$APP_DIR/default.desktop"
 
 # 2. Download appimagetool if not present
@@ -42,12 +51,12 @@ fi
 
 # 3. Build AppImage
 echo "[3/4] Packaging AppImage..."
-# Use appimagetool from the project root if it exists, or from current scripts dir
+# Use --appimage-extract-and-run for environments without FUSE (like GitHub Actions)
 [ -f "../appimagetool" ] && TOOL="../appimagetool" || TOOL="./appimagetool"
-ARCH=x86_64 $TOOL "$APP_DIR"
+ARCH=x86_64 ./appimagetool --appimage-extract-and-run "$APP_DIR" "Sorterr-v1.4-x86_64.AppImage"
 
 # 4. Cleanup
 echo "[4/4] Cleanup..."
-# rm -rf "$APP_DIR" # Keeping it for now for verification
+# rm -rf "$APP_DIR"
 
-echo "=== Build Complete: Sorterr-x86_64.AppImage ==="
+echo "=== Build Complete: Sorterr-v1.4-x86_64.AppImage ==="

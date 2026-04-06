@@ -29,12 +29,12 @@ ICON_OPT=""
     --add-data "web:web" \
     --collect-all rawpy \
     --collect-all exifread \
-    --name "Sorterr" \
+    --name "Sorterr-v1.4" \
     $ICON_OPT \
     main.py
 
 echo ""
 echo "============================================================"
 echo "  Build complete!"
-echo "  Binary: $(pwd)/dist/Sorterr"
+echo "  Binary: $(pwd)/dist/Sorterr-v1.4"
 echo "============================================================"
