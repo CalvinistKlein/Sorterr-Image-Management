@@ -192,7 +192,7 @@ async function pollCacheProgress() {
         const pct = Math.round((p.done / p.total) * 100);
         cacheGroup.style.display = '';
         cacheBar.style.width = pct + '%';
-        cacheLabel.textContent = `${p.done} / ${p.total}`;
+        cacheLabel.textContent = `${p.done} / ${p.total} (${pct}%)`;
 
         if (p.running) {
             setTimeout(tick, 400);
@@ -458,8 +458,8 @@ async function updateUIForImage(img) {
         return;
     }
     filenameLabel.textContent = img.filename; statusTag.textContent = img.status;
-    let dc = currentIndex + layoutSize; if (dc > filteredImages.length) dc = filteredImages.length;
-    counterLabel.textContent = layoutSize === 1 ? `${currentIndex + 1} / ${filteredImages.length}` : `${currentIndex + 1}-${dc} / ${filteredImages.length}`;
+    const pct = Math.round(((currentIndex + 1) / filteredImages.length) * 100);
+    counterLabel.textContent = layoutSize === 1 ? `${currentIndex + 1} / ${filteredImages.length} (${pct}%)` : `${currentIndex + 1}-${dc} / ${filteredImages.length} (${pct}%)`;
     
     updateStars(img.rating); updateColorDot(img.color);
     

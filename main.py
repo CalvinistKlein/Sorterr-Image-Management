@@ -72,6 +72,37 @@ def save_metadata(root):
     except Exception:
         pass
 
+def write_xmp_sidecar(image_path, rating, color):
+    """Write or update an XMP sidecar with rating and color label for interoperability."""
+    # Write both standard styles: image.xmp (Lightroom) and image.ext.xmp (Darktable)
+    base = os.path.splitext(image_path)[0]
+    sidecars = [base + ".xmp", image_path + ".xmp"]
+    
+    xmp_label = color if color != "None" else ""
+    
+    # We use a standard minimal XMP template. 
+    # Interoperability note: xmp:Rating (0-5) and xmp:Label (string)
+    template = f"""<?xpacket begin="" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Sorterr XMP Sync">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+    xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/"
+   xmp:Rating="{rating}"
+   xmp:Label="{xmp_label}"/>
+ </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>"""
+
+    for sc_path in sidecars:
+        try:
+            # Check if file exists to avoid wiping other metadata (simple check)
+            # Future improvement: parse and inject instead of overwrite
+            with open(sc_path, "w", encoding="utf-8") as f:
+                f.write(template)
+        except Exception as e:
+            print(f"XMP error {sc_path}: {e}")
+
 def open_image(filepath):
     """Open any image (including RAW) as a PIL Image."""
     ext = os.path.splitext(filepath)[1].lower()
@@ -370,7 +401,21 @@ def move_image(filename, current_path, category):
                 counter += 1
         if os.path.exists(current_path):
             shutil.move(current_path, new_path)
-            # Cache is flat per root, so same paths — no move needed
+            
+            # Sync metadata to XMP sidecars
+            mdata = metadata.get(filename, {})
+            write_xmp_sidecar(new_path, mdata.get('rating', 0), mdata.get('color', 'None'))
+
+            # Move existing XMP files if they exist
+            for ext in [".xmp", os.path.splitext(filename)[1] + ".xmp"]:
+                old_xmp = os.path.splitext(current_path)[0] + ext if ext == ".xmp" else current_path + ".xmp"
+                if os.path.exists(old_xmp):
+                    new_xmp = os.path.splitext(new_path)[0] + ext if ext == ".xmp" else new_path + ".xmp"
+                    try:
+                        shutil.move(old_xmp, new_xmp)
+                    except Exception:
+                        pass
+            
             return new_path
         return None
     except Exception as e:
@@ -392,6 +437,17 @@ def restore_image(filename, current_path):
                 target_path = os.path.join(current_root, f"{base}_{counter}{ext}")
                 counter += 1
         shutil.move(current_path, target_path)
+        
+        # Move associated XMP files back to root
+        for ext in [".xmp", os.path.splitext(filename)[1] + ".xmp"]:
+            old_xmp = os.path.splitext(current_path)[0] + ext if ext == ".xmp" else current_path + ".xmp"
+            if os.path.exists(old_xmp):
+                new_xmp = os.path.splitext(target_path)[0] + ext if ext == ".xmp" else target_path + ".xmp"
+                try:
+                    shutil.move(old_xmp, new_xmp)
+                except Exception:
+                    pass
+
         return target_path
     except Exception as e:
         print(f"Restore error: {e}")
@@ -404,6 +460,15 @@ def set_star_rating(filename, rating):
         metadata[filename] = {}
     metadata[filename]['rating'] = rating
     save_metadata(current_root)
+    
+    # Sync to XMP (need full path)
+    # Find image in current_root or Picks/Rejects
+    for folder in ['', 'Picks', 'Rejects']:
+        potential_path = os.path.join(current_root, folder, filename) if folder else os.path.join(current_root, filename)
+        if os.path.exists(potential_path):
+            write_xmp_sidecar(potential_path, rating, metadata[filename].get('color', 'None'))
+            break
+
     return True
 
 @eel.expose
@@ -413,6 +478,14 @@ def set_color_tag(filename, color):
         metadata[filename] = {}
     metadata[filename]['color'] = color
     save_metadata(current_root)
+    
+    # Sync to XMP
+    for folder in ['', 'Picks', 'Rejects']:
+        potential_path = os.path.join(current_root, folder, filename) if folder else os.path.join(current_root, filename)
+        if os.path.exists(potential_path):
+            write_xmp_sidecar(potential_path, metadata[filename].get('rating', 0), color)
+            break
+
     return True
 
 # Initialize Eel - resolve web path for both dev and PyInstaller frozen builds
