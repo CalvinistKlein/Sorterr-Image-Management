@@ -10,9 +10,8 @@ Sorterr is a fast, keyboard-driven desktop application for sorting and culling l
 
 | Platform | Link |
 |---|---|
-| **Windows** | [Download Sorterr.exe (v1.0)](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases) |
-| **Linux (AppImage)** | [Download Sorterr-x86_64.AppImage (v1.0)](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases) |
-| **Linux (Binary)** | [Download Sorterr (v1.0)](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases) |
+| **Windows** | [Download Sorterr-v1.4.exe](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest) |
+| **Linux (AppImage)** | [Download Sorterr-v1.4-x86_64.AppImage](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest) |
 
 ---
 
@@ -27,7 +26,7 @@ Sorterr is a fast, keyboard-driven desktop application for sorting and culling l
 - **Visual indicators** — status circle (green/red/grey), color badge, and star rank overlaid on every thumbnail and preview
 - **Star ratings** — 1–5 stars, togglable (click the active star to clear)
 - **Color tags** — Red, Yellow, Green, Blue, Purple; assignable by keyboard shortcut
-- **Smart Collections** — group images by time gap, sorted chronologically
+- **Time & Burst Grouping** — group images by custom time gaps or rapid-fire bursts
 - **Multiple layout modes** — Single, Split (2-up), Grid (4-up)
 - **Thumbnail caching** — background pre-generation with live progress bar
 - **EXIF metadata panel** — camera, settings (f-stop, shutter, ISO, focal length), and date

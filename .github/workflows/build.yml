@@ -75,3 +75,42 @@ jobs:
       with:
         name: Sorterr-v1.4-Linux-AppImage
         path: Sorterr-v1.4-x86_64.AppImage
+
+  create-release:
+    needs: [build-windows, build-linux-appimage]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Windows Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Sorterr-v1.4-Windows
+        path: ./dist
+
+    - name: Download Linux Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Sorterr-v1.4-Linux-AppImage
+        path: ./
+
+    - name: Create or Update Release v1.4
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.4
+        name: Sorterr v1.4 - Smart Culling Refined
+        body: |
+          ### Sorterr v1.4
+          Professional photo culling, built for speed.
+          
+          **What's New:**
+          - **Advanced "Burst Grouping" mode**: Automatically group rapid-fire sequences (configurable count and window).
+          - **Rebranded "Time Grouping"**: Improved scene detection with customizable gaps.
+          - **Precision Controls**: Sliders now have companion text inputs for exact value entry.
+          - **Non-Destructive XMP Sync**: Surgical metadata updates preserve your raw development edits from Lightroom and Darktable.
+          - **Chronological Defaults**: Sorting now defaults to time-based for a smoother experience.
+        draft: false
+        prerelease: false
+        files: |
+          dist/Sorterr-v1.4.exe
+          Sorterr-v1.4-x86_64.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
