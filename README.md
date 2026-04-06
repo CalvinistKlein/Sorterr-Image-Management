@@ -38,7 +38,9 @@ Sorterr is a fast, keyboard-driven desktop application for sorting and culling l
 
 ## Screenshots
 
-> Open the app and select a folder to get started.
+![Main Screen](assets/main_screen.png)
+
+> Professional photo culling, built for speed.
 
 ---
 
