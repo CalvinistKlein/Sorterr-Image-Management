@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 APP_NAME="Sorterr-v1.4"
 APP_DIR="Sorterr.AppDir"
 EXECUTABLE="dist/Sorterr-v1.4"
-ICON="web/favicon.ico"
+ICON="assets/sorterr.png"
 
 echo "=== Building AppImage for $APP_NAME ==="
 
