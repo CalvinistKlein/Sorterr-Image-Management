@@ -25,6 +25,11 @@ pyinstaller --onefile --windowed ^
     --name "Sorterr-v1.4" ^
     main.py
 
+if errorlevel 1 (
+    echo ERROR: PyInstaller failed to build.
+    exit /b 1
+)
+
 echo.
 echo ============================================================
 echo  Build complete! Your exe is in the dist\ folder.
