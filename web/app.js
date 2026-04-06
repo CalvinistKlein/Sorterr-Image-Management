@@ -107,18 +107,30 @@ function addRecent(folderPath) {
     renderRecentProjects();
 }
 
-function removeRecent(folderPath) {
-    saveRecents(getRecents().filter(r => r.path !== folderPath));
-    renderRecentProjects();
+function clearRecents() {
+    if (confirm("Clear all recent project history?")) {
+        localStorage.removeItem('sorterr_recents');
+        renderRecentProjects();
+    }
 }
 
 function renderRecentProjects() {
     const list = document.getElementById('recent-projects-list');
     const noMsg = document.getElementById('no-recents-msg');
+    const clearBtn = document.getElementById('clear-recents-btn');
     const recents = getRecents();
     list.innerHTML = '';
-    if (recents.length === 0) { noMsg.style.display = ''; return; }
+    
+    if (recents.length === 0) { 
+        noMsg.style.display = ''; 
+        clearBtn.classList.add('hidden');
+        return; 
+    }
+    
     noMsg.style.display = 'none';
+    clearBtn.classList.remove('hidden');
+    clearBtn.onclick = clearRecents;
+
     recents.forEach(r => {
         const item = document.createElement('div');
         item.className = 'recent-item';

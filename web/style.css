@@ -693,13 +693,31 @@ body {
     padding: 16px;
     text-align: left;
 }
+#recent-projects-section .recent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
 #recent-projects-section h4 {
     color: var(--text-secondary);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin: 0 0 10px;
+    margin: 0;
 }
+.welcome-hint-link {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-decoration: underline;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+.welcome-hint-link:hover { opacity: 1; }
+
 .recent-item {
     display: flex;
     align-items: center;
