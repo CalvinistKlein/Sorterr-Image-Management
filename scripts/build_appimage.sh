@@ -2,10 +2,11 @@
 set -e
 
 # Configuration
+cd "$(dirname "$0")/.."
 APP_NAME="Sorterr-v1.4"
 APP_DIR="Sorterr.AppDir"
-EXECUTABLE="../dist/Sorterr-v1.4"
-ICON="../web/favicon.ico" # Use web favicon as fallback icons if assets is missing
+EXECUTABLE="dist/Sorterr-v1.4"
+ICON="web/favicon.ico"
 
 echo "=== Building AppImage for $APP_NAME ==="
 
