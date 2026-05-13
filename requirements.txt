@@ -5,3 +5,4 @@ rawpy
 exifread
 imageio
 numpy
+setuptools<70.0.0
