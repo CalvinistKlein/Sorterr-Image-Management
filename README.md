@@ -10,8 +10,9 @@ Sorterr is a fast, keyboard-driven desktop application for sorting and culling l
 
 | Platform | Link |
 |---|---|
-| **Windows** | [Download Sorterr-v1.4.exe](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest) |
-| **Linux (AppImage)** | [Download Sorterr-v1.4-x86_64.AppImage](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest) |
+| **Windows** | [Download Sorterr-v3.0-Windows.exe](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest/download/Sorterr-Windows.exe) |
+| **macOS** | [Download Sorterr-v3.0-macOS](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest/download/Sorterr-macOS) |
+| **Linux** | [Download Sorterr-v3.0-Linux](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest/download/Sorterr-Linux) |
 
 ---
 
@@ -151,6 +152,7 @@ Picked images are moved to a `Picks/` subfolder. Rejected images go to `Rejects/
 | Reject | `↓` / `S` |
 | Restore to unsorted | `Alt+↑` (un-pick) · `Alt+↓` (un-reject) |
 | Open folder picker | `O` |
+| Reload folder | `R` |
 | Cycle layout backward | `Q` |
 | Cycle layout forward | `E` |
 | Star ratings | `1` `2` `3` `4` `5` |

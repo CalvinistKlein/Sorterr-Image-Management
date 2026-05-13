@@ -39,6 +39,7 @@ CACHE_DIR_NAME = '.sorterr_cache'
 SETTINGS_FILENAME = '.sorterr_settings.json'
 
 # Global state
+VERSION = "3.0"
 current_root = os.getcwd()
 cache_progress = {'total': 0, 'done': 0, 'pre_cached': 0, 'running': False}
 current_run_id = 0
