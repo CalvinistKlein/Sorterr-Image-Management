@@ -44,12 +44,20 @@ jobs:
           if [ "${{ runner.os }}" = "macOS" ]; then
             export MACOSX_DEPLOYMENT_TARGET=11.0
           fi
-          # Use eel's bundling mode
-          python -m eel main.py web --onefile --name Sorterr --noconsole
+          # Determine icon based on OS
+          ICON_FLAG=""
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            ICON_FLAG="--icon=assets/icon.ico"
+          elif [ "${{ runner.os }}" = "macOS" ]; then
+            ICON_FLAG="--icon=assets/icon.icns"
+          fi
+
+          # Use eel's bundling mode with the new icon
+          python -m eel main.py web --onefile --name Sorterr --noconsole $ICON_FLAG
           
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             mv dist/Sorterr.exe dist/${{ matrix.artifact_name }}
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
+          elif [ "${{ matrix.os }}" = "macos-13" ] || [ "${{ matrix.os }}" = "macos-14" ]; then
             # macOS creates a .app directory. Zip it to preserve permissions.
             cd dist
             zip -r ${{ matrix.artifact_name }}.zip Sorterr.app
