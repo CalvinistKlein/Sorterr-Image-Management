@@ -12,12 +12,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, macos-13, macos-14, ubuntu-latest]
         include:
           - os: windows-latest
             artifact_name: Sorterr-Windows.exe
-          - os: macos-latest
-            artifact_name: Sorterr-macOS
+          - os: macos-13
+            artifact_name: Sorterr-macOS-Intel
+          - os: macos-14
+            artifact_name: Sorterr-macOS-Apple-Silicon
           - os: ubuntu-latest
             artifact_name: Sorterr-Linux
 
@@ -39,6 +41,9 @@ jobs:
       - name: Build with PyInstaller
         shell: bash
         run: |
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            export MACOSX_DEPLOYMENT_TARGET=11.0
+          fi
           # Use eel's bundling mode
           python -m eel main.py web --onefile --name Sorterr --noconsole
           
@@ -66,16 +71,18 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             Sorterr-Windows.exe/Sorterr-Windows.exe
-            Sorterr-macOS/Sorterr-macOS.zip
+            Sorterr-macOS-Intel/Sorterr-macOS-Intel.zip
+            Sorterr-macOS-Apple-Silicon/Sorterr-macOS-Apple-Silicon.zip
             Sorterr-Linux/Sorterr-Linux
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
