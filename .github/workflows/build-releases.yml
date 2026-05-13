@@ -12,12 +12,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-13, macos-14, ubuntu-latest]
+        os: [windows-latest, macos-14, ubuntu-latest]
         include:
           - os: windows-latest
             artifact_name: Sorterr-Windows.exe
-          - os: macos-13
-            artifact_name: Sorterr-macOS-Intel
           - os: macos-14
             artifact_name: Sorterr-macOS-Apple-Silicon
           - os: ubuntu-latest
@@ -91,6 +89,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             Sorterr-Windows.exe/Sorterr-Windows.exe
-            Sorterr-macOS-Intel/Sorterr-macOS-Intel.zip
             Sorterr-macOS-Apple-Silicon/Sorterr-macOS-Apple-Silicon.zip
             Sorterr-Linux/Sorterr-Linux
