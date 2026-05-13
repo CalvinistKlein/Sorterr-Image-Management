@@ -1,0 +1,119 @@
+name: Build Windows and Linux Versions
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies and Create venv
+      run: |
+        python -m venv venv
+        venv\Scripts\python.exe -m pip install --upgrade pip
+        venv\Scripts\pip.exe install -r requirements.txt
+        venv\Scripts\pip.exe install pyinstaller
+
+    - name: Build Binary with build.bat
+      run: |
+        cmd /c scripts\build.bat
+
+    - name: Upload Windows Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sorterr-v1.4-Windows
+        path: dist/Sorterr-v1.4.exe
+
+
+  build-linux-appimage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies and Create venv
+      run: |
+        python -m venv venv
+        ./venv/bin/pip install --upgrade pip
+        ./venv/bin/pip install -r requirements.txt
+        ./venv/bin/pip install pyinstaller
+
+    - name: Build Binary with build.sh
+      run: |
+        chmod +x scripts/build.sh
+        bash scripts/build.sh
+
+    - name: Build AppImage with build_appimage.sh
+      run: |
+        chmod +x scripts/build_appimage.sh
+        bash scripts/build_appimage.sh
+
+    - name: Upload Linux Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sorterr-v1.4-Linux-AppImage
+        path: Sorterr-v1.4-x86_64.AppImage
+
+  create-release:
+    needs: [build-windows, build-linux-appimage]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Windows Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Sorterr-v1.4-Windows
+        path: ./dist
+
+    - name: Download Linux Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: Sorterr-v1.4-Linux-AppImage
+        path: ./
+
+    - name: Create or Update Release v1.4
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v1.4
+        name: Sorterr v1.4 - Smart Culling Refined
+        body: |
+          ### Sorterr v1.4
+          Professional photo culling, built for speed.
+          
+          **What's New:**
+          - **Advanced "Burst Grouping" mode**: Automatically group rapid-fire sequences (configurable count and window).
+          - **Rebranded "Time Grouping"**: Improved scene detection with customizable gaps.
+          - **Precision Controls**: Sliders now have companion text inputs for exact value entry.
+          - **Non-Destructive XMP Sync**: Surgical metadata updates preserve your raw development edits from Lightroom and Darktable.
+          - **Chronological Defaults**: Sorting now defaults to time-based for a smoother experience.
+        draft: false
+        prerelease: false
+        files: |
+          dist/Sorterr-v1.4.exe
+          Sorterr-v1.4-x86_64.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

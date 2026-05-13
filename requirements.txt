@@ -1,0 +1,7 @@
+eel
+Pillow
+Flask
+rawpy
+exifread
+imageio
+numpy
