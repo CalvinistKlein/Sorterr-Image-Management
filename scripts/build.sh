@@ -20,21 +20,17 @@ rm -rf build/ dist/ *.spec
 
 echo "[3/3] Building Sorterr binary..."
 
-# Determine icon based on OS
-ICON_FLAG=""
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    [ -f "assets/icon.icns" ] && ICON_FLAG="--icon assets/icon.icns"
-else
-    [ -f "assets/icon.ico" ] && ICON_FLAG="--icon assets/icon.ico"
-fi
+# Try with icon first; fall back silently if it doesn't exist
+ICON_OPT=""
+[ -f "web/favicon.ico" ] && ICON_OPT="--icon web/favicon.ico"
 
 ./venv/bin/pyinstaller \
     --onefile \
     --add-data "web:web" \
     --collect-all rawpy \
     --collect-all exifread \
-    --name "Sorterr" \
-    $ICON_FLAG \
+    --name "Sorterr-v1.4" \
+    $ICON_OPT \
     main.py
 
 echo ""
