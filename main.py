@@ -147,6 +147,8 @@ def fingerprint_file(filepath):
     try:
         size = os.path.getsize(filepath)
         h.update(str(size).encode())
+        # Include filename in hash to prevent collisions if size + header match
+        h.update(os.path.basename(filepath).encode())
         with open(filepath, 'rb') as f:
             h.update(f.read(65536))
         return h.hexdigest()
@@ -850,7 +852,7 @@ def set_color_tag(fingerprint, color):
 
     # Sync to XMP
     folder_path = os.path.join(current_root, row['folder']) if row['folder'] else current_root
-    image_path = os.path.join(folder_path, filename)
+    image_path = os.path.join(folder_path, row['filename'])
     if os.path.exists(image_path):
         write_xmp_sidecar(image_path, row['rating'], color)
 
