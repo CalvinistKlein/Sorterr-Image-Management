@@ -555,6 +555,21 @@ def open_system_folder_dialog():
         except Exception as e:
             print(f"Zenity error: {e}")
 
+    # macOS: Use osascript to trigger native folder picker, avoids Tkinter crash
+    if sys.platform == 'darwin':
+        import subprocess
+        try:
+            cmd = [
+                'osascript', 
+                '-e', 'tell application "System Events" to activate', 
+                '-e', 'tell application "System Events" to return POSIX path of (choose folder with prompt "Select Gallery Folder")'
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode == 0:
+                return result.stdout.strip()
+        except Exception as e:
+            print(f"osascript error: {e}")
+
     # Windows / Fallback: Use tkinter
     if HAS_TKINTER:
         try:
