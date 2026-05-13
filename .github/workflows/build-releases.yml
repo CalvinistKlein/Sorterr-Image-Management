@@ -45,8 +45,10 @@ jobs:
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             mv dist/Sorterr.exe dist/${{ matrix.artifact_name }}
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            # On macOS, move the .app folder or the binary
-            mv dist/Sorterr dist/${{ matrix.artifact_name }}
+            # macOS creates a .app directory. Zip it to preserve permissions.
+            cd dist
+            zip -r ${{ matrix.artifact_name }}.zip Sorterr.app
+            cd ..
           else
             mv dist/Sorterr dist/${{ matrix.artifact_name }}
           fi
@@ -55,7 +57,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.artifact_name }}
-          path: dist/${{ matrix.artifact_name }}
+          path: |
+            dist/${{ matrix.artifact_name }}
+            dist/${{ matrix.artifact_name }}.zip
 
   release:
     name: Create Release
@@ -71,7 +75,7 @@ jobs:
         with:
           files: |
             Sorterr-Windows.exe/Sorterr-Windows.exe
-            Sorterr-macOS/Sorterr-macOS
+            Sorterr-macOS/Sorterr-macOS.zip
             Sorterr-Linux/Sorterr-Linux
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

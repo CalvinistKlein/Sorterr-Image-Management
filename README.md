@@ -11,7 +11,7 @@ Sorterr is a fast, keyboard-driven desktop application for sorting and culling l
 | Platform | Link |
 |---|---|
 | **Windows** | [Download Sorterr-v3.0-Windows.exe](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest/download/Sorterr-Windows.exe) |
-| **macOS** | [Download Sorterr-v3.0-macOS](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest/download/Sorterr-macOS) |
+| **macOS** | [Download Sorterr-v3.0-macOS.zip](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest/download/Sorterr-macOS.zip) |
 | **Linux** | [Download Sorterr-v3.0-Linux](https://github.com/CalvinistKlein/Sorterr-Image-Management/releases/latest/download/Sorterr-Linux) |
 
 ---
